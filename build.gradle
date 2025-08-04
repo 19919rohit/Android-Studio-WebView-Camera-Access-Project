@@ -1,35 +1,30 @@
+// Top-level build.gradle (Project-level)
+
 buildscript {
     repositories {
         google()
+        mavenCentral()
+        // Keeping jcenter as fallback (though it's deprecated)
         jcenter()
+        // Keeping mavenLocal in case you need local libs
         mavenLocal()
     }
     dependencies {
-        classpath 'com.google.gms:google-services:4.2.0'
+        // Android Gradle Plugin compatible with Gradle 7.6
+        classpath 'com.android.tools.build:gradle:7.4.2'
+
+        // Dummy Firebase / Google Services references
+        // These won't break the build if you don't apply google-services plugin in app-level
+        classpath 'com.google.gms:google-services:4.3.15'
         classpath 'com.google.firebase:firebase-plugins:1.1.5'
     }
 }
 
-repositories {
-    google()
-}
-
 allprojects {
-    // ...
     repositories {
-        // Check that you have the following line (if not, add it):
-        google()  // Google's Maven repository
-        // ...
-        mavenLocal()
+        google()
+        mavenCentral()
         jcenter()
+        mavenLocal()
     }
 }
-
-
-
-
-
-
-
-
-
