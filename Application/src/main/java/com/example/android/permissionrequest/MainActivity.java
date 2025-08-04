@@ -1,49 +1,51 @@
-/*
-* Copyright 2013 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-
-
 package com.example.android.permissionrequest;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
+import android.webkit.PermissionRequest;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import com.example.android.common.activities.SampleActivityBase;
+public class MainActivity extends AppCompatActivity {
 
-/**
- * A simple launcher activity containing a summary sample description, sample log and a custom
- * {@link android.support.v4.app.Fragment} which can display a view.
- * <p>
- * For devices with displays with a width of 720dp or greater, the sample log is always visible,
- * on other devices it's visibility is controlled by an item on the Action Bar.
- */
-public class MainActivity extends SampleActivityBase {
-
-    public static final String TAG = "MainActivity";
+    private static final int PERMISSION_REQUEST_CODE = 1;
+    private WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            PermissionRequestFragment fragment = new PermissionRequestFragment();
-            transaction.replace(R.id.sample_content_fragment, fragment);
-            transaction.commit();
+        webView = new WebView(this);
+        setContentView(webView);
+
+        // Request microphone & camera permissions at runtime
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA},
+                        PERMISSION_REQUEST_CODE);
+            }
         }
-    }
 
+        // Enable mic & camera for WebView
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    request.grant(request.getResources());
+                }
+            }
+        });
+
+        // Load your website
+        webView.loadUrl("https://aidashboardartstudio.netlify.app/");
+    }
 }
